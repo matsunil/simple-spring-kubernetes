@@ -1,0 +1,44 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: simple-server
+spec:
+  selector:
+    app: simple-server
+  ports:
+  - protocol: TCP
+    port: 8080
+    nodePort: 30081
+  type: NodePort
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-server
+spec:
+  selector:
+      matchLabels:
+        app: simple-server
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: simple-server
+    spec:
+      containers:
+        - name: simple-server
+          image: simple-server:latest
+          imagePullPolicy: Never
+          ports:
+          - containerPort: 8080
+          env:
+            - name: MONGO_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: username
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: password
